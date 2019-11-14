@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
+FROM ubuntu:18.04
 
 ARG PYTHON_VERSION=3.7
 ARG OPENCV_VERSION=4.1.1
@@ -147,38 +147,5 @@ RUN apt-get -y update --fix-missing && \
 RUN cd /usr/local/lib/pkgconfig && mv opencv4.pc opencv.pc
 
 RUN apt-get install -y python3-setuptools
-RUN apt-get install -y git && \
-    apt-get autoremove -y && \
-    apt-get clean
 
-RUN git clone https://github.com/FFmpeg/nv-codec-headers.git /root/nv-codec-headers && \
-    cd root/nv-codec-headers && \
-    git checkout sdk/9.0 && \
-    make && \
-    make install && \
-    cd .. && rm -rf nv-codec-headers
-
-RUN apt-get install -y libx264-dev && \
-    apt-get autoremove -y && \
-    apt-get clean
-
-RUN git clone https://github.com/FFmpeg/FFmpeg /root/ffmpeg && \ 
-    cd /root/ffmpeg && ./configure \ 
-    --enable-gpl \ 
-    --enable-nvenc --enable-cuda \
-    --enable-cuvid \
-    --enable-libx264 \
-    --extra-cflags=-I/usr/local/cuda/include \
-    --extra-cflags=-I/usr/local/include \
-    --extra-ldflags=-L/usr/local/cuda/lib64 && \
-    make -j8 && \
-    make install -j8 && \
-    cd /root && rm -rf ffmpeg
-
-#Check
-RUN ffmpeg -codecs|grep nvenc
-
-# Lib for encoding
-RUN apt-get install -y libnvidia-compute-430 libnvidia-decode-430 libnvidia-encode-430 libnvidia-ifr1-430 libnvidia-fbc1-430 libnvidia-gl-430 && \
-    apt-get autoremove -y && \
-    apt-get clean
+RUN apt-get install -y ffmpeg
