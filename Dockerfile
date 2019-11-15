@@ -84,6 +84,7 @@ RUN apt-get -y update --fix-missing && \
       -D BUILD_PERF_TESTS=OFF \
       -D BUILD_TESTS=OFF \
       -D CMAKE_INSTALL_PREFIX=/usr/local \
+      -D CMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs \
       -D OPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
       -D BUILD_opencv_python3=$( [ ${PYTHON_VERSION%%.*} -ge 3 ] && echo "ON" || echo "OFF" ) \
       -D BUILD_opencv_python2=$( [ ${PYTHON_VERSION%%.*} -lt 3 ] && echo "ON" || echo "OFF" ) \
@@ -93,6 +94,7 @@ RUN apt-get -y update --fix-missing && \
       -D BUILD_EXAMPLES=OFF \
       -D WITH_IPP=OFF \
       -D WITH_FFMPEG=ON \
+      -D WITH_CUDA=ON \
       -D WITH_GSTREAMER=ON \
       -D WITH_V4L=ON \
       -D WITH_LIBV4L=ON \
