@@ -53,29 +53,28 @@ RUN apt-get -y update --fix-missing && \
         yasm \
         libjpeg-dev \
         libtiff-dev \
-        libpq-dev \
-    && \
+        libpq-dev
 
 
 # install python dependencies
-    sysctl -w net.ipv4.ip_forward=1 && \
+RUN sysctl -w net.ipv4.ip_forward=1 && \
     wget https://bootstrap.pypa.io/get-pip.py --progress=bar:force:noscroll --no-check-certificate && \
     python${PYTHON_VERSION} get-pip.py && \
     rm get-pip.py && \
-    pip${PYTHON_VERSION} install numpy && \
+    pip${PYTHON_VERSION} install numpy
 
 # Install OpenCV
-    wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip -O opencv.zip --progress=bar:force:noscroll --no-check-certificate && \
+RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip -O opencv.zip --progress=bar:force:noscroll --no-check-certificate && \
     unzip -q opencv.zip && \
     mv /opencv-${OPENCV_VERSION} /opencv && \
     rm opencv.zip && \
     wget https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip -O opencv_contrib.zip --progress=bar:force:noscroll --no-check-certificate && \
     unzip -q opencv_contrib.zip && \
     mv /opencv_contrib-${OPENCV_VERSION} /opencv_contrib && \
-    rm opencv_contrib.zip && \
+    rm opencv_contrib.zip
 
 # Prepare build
-    mkdir /opencv/build && \
+RUN mkdir /opencv/build && \
     cd /opencv/build && \
     cmake \
       -D CMAKE_BUILD_TYPE=RELEASE \
@@ -102,17 +101,16 @@ RUN apt-get -y update --fix-missing && \
       -D WITH_QT=ON \
       -D WITH_OPENGL=ON \
       -D ENABLE_PRECOMPILED_HEADERS=OFF \
-      .. \
-    && \
+      ..
 
 # Build, Test and Install
-    cd /opencv/build && \
+RUN cd /opencv/build && \
     make -j$(nproc) && \
     make install && \
-    ldconfig && \
+    ldconfig
 
 # cleaning
-    apt-get -y remove \
+RUN apt-get -y remove \
         gfortran \
         apt-utils \
         checkinstall \
@@ -136,11 +134,15 @@ RUN apt-get -y update --fix-missing && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /opencv_contrib && \
-    rm -rf /opencv && \
+    rm -rf /opencv
 
 # Set the default python and install PIP packages
-    update-alternatives --install /usr/bin/python${PYTHON_VERSION%%.*} python${PYTHON_VERSION%%.*} /usr/bin/python${PYTHON_VERSION} 1 && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_VERSION} 1 && \
+RUN update-alternatives --install /usr/bin/python${PYTHON_VERSION%%.*} python${PYTHON_VERSION%%.*} /usr/bin/python${PYTHON_VERSION} 1 && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_VERSION} 1
+
+# # https://github.com/tensorflow/tensorflow/issues/10776
+RUN cp /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+    export LD_LIBRARY_PATH=/usr/local/cuda-10.0/lib64/stubs/:$LD_LIBRARY_PATH && \
 
 # Call default command.
     python --version && \
